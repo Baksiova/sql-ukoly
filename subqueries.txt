@@ -1,0 +1,117 @@
+-- Store sales
+
+SELECT *
+FROM sakila.sales_by_store
+WHERE 1=(
+    SELECT 1 
+    FROM sakila.sales_total
+    WHERE sakila.sales_by_store.total_sales / total_sales > 0.5
+    )
+
+-- Film ratings statistics
+SELECT * FROM sakila.rating_analytics
+WHERE avg_rental_rate > (
+    SELECT avg_rental_rate 
+    FROM sakila.rating_analytics 
+    WHERE rating IS NULL
+    )
+
+---- or using WITH:
+WITH cte as (
+    SELECT avg_rental_rate
+    FROM sakila.rating_analytics
+    WHERE rating IS NULL
+)
+SELECT * FROM sakila.rating_analytics
+WHERE avi_rental_rate > (SELECT * FROM cte)
+
+WITH cte as (
+    SELECT avg_rental_duration
+    FROM sakila.rating_analytics
+    WHERE rating IS NULL
+)
+SELECT * FROM sakila.rating_analytics
+WHERE avg_rental_duration > (SELECT * FROM cte)
+
+SELECT * FROM sakila.rating_analytics
+WHERE rating = (SELECT rating FROM sakila.rating WHERE id_rating = 3)
+
+SELECT * FROM sakila.rating_analytics
+WHERE rating IN (SELECT rating FROM sakila.rating WHERE id_rating IN (3, 2, 5))
+    AND rating IS NOT NULL
+
+SELECT * FROM sakila.rating_analytics
+WHERE rating IS NOT NULL
+ORDER BY rentals DESC
+
+SELECT * FROM sakila.rating_analytics
+WHERE rating IS NOT NULL
+ORDER BY avi_film_length ASC
+
+-- Actors statistics
+WITH  actor as (
+    SELECT actor_id
+    FROM sakila.actor
+    WHERE first_name = 'ZERO'
+      AND last_name = 'CAGE'
+)
+SELECT * FROM sakila.actor_analytics
+WHERE actor_id = (SELECT * FROM actor)
+;
+
+SELECT *
+FROM sakila.actor_analytics
+WHERE films_amount > 30
+
+WITH cte as (
+    SELECT *
+    FROM sakila.actor_analytics
+    WHERE films_amount > 30
+)
+SELECT *
+FROM sakila.actor
+WHERE actor_id in (SELECT actor_id FROM cte)
+
+SELECT * 
+FROM sakila.actor_analytics
+WHERE longest_movie_duration IN (184, 174, 176, 164
+
+WITH cte as (
+    SELECT *
+    FROM sakila.actor_analytics
+    WHERE longest_movie_duration IN (184, 174, 176, 164)
+), actor_film as
+(
+    SELECT *
+    FROM sakila.film_actor
+    WHERE actor_id IN (SELECT actor_id FROM cte)
+)
+SELECT * FROM sakila.film
+WHERE length in (184, 174, 176, 164)
+    and film_id in (SELECT film_id FROM actor_film)
+
+-- Films
+SELECT *
+FROM sakila.film_list
+WHERE category in ('Horror', 'Documentary', 'Family')
+   AND rating in ('R', 'NC-17')
+
+WITH cte as (
+    SELECT FID
+    FROM sakila.film_list
+    WHERE category in ('Horror', 'Documentary', 'Family')
+    AND rating in ('R', 'NC-17')
+)
+SELECT * FROM sakila.film_text
+WHERE film_id in (SELECT FID FROM cte)
+
+SELECT *
+FROM sakila.film_list
+ORDER BY category ASC, price DESC
+
+SELECT *
+FROM sakila.film_list
+ORDER BY rating, length DESC
+
+
+
